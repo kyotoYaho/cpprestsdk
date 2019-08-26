@@ -436,28 +436,6 @@ public:
     /// <param name="stream">The stream that the JSON string representation should be written to.</param>
     _ASYNCRTIMP void serialize(utility::ostream_t& stream) const;
 
-#ifdef _WIN32
-    /// <summary>
-    /// Parses a JSON value from the contents of a single-byte (UTF8) stream.
-    /// </summary>
-    /// <param name="stream">The stream to read the JSON value from</param>
-    _ASYNCRTIMP static value __cdecl parse(std::istream& stream);
-
-    /// <summary>
-    /// Parses a JSON value from the contents of a single-byte (UTF8) stream.
-    /// </summary>
-    /// <param name="stream">The stream to read the JSON value from</param>
-    /// <param name="errorCode">If parsing fails, the error code is greater than 0</param>
-    /// <returns>The parsed object. Returns web::json::value::null if failed</returns>
-    _ASYNCRTIMP static value __cdecl parse(std::istream& stream, std::error_code& error);
-
-    /// <summary>
-    /// Serializes the content of the value into a single-byte (UTF8) stream.
-    /// </summary>
-    /// <param name="stream">The stream that the JSON string representation should be written to.</param>
-    _ASYNCRTIMP void serialize(std::ostream& stream) const;
-#endif
-
     /// <summary>
     /// Converts the JSON value to a C++ double, if and only if it is a number value.
     /// Throws <see cref="json_exception"/>  if the value is not a number
@@ -642,18 +620,6 @@ public:
     /// <param name="key">The name of the field</param>
     /// <returns>A reference to the value kept in the field.</returns>
     _ASYNCRTIMP value& operator[](const utility::string_t& key);
-
-#ifdef _WIN32
-private:
-    // Only used internally by JSON parser
-    _ASYNCRTIMP value& operator[](const std::string& key)
-    {
-        // JSON object stores its field map as a unordered_map of string_t, so this conversion is hard to avoid
-        return operator[](utility::conversions::to_string_t(key));
-    }
-
-public:
-#endif
 
     /// <summary>
     /// Accesses an element of a JSON array.
@@ -1480,12 +1446,12 @@ public:
     }
 
 #ifdef _WIN32
-    _String(std::string&& value) : m_string(utility::conversions::to_utf16string(std::move(value)))
+    _String(std::string&& value) : m_string(std::move(value))
     {
         m_has_escape_char = has_escape_chars(*this);
     }
     _String(std::string&& value, bool escape_chars)
-        : m_string(utility::conversions::to_utf16string(std::move(value))), m_has_escape_char(escape_chars)
+        : m_string(std::move(value)), m_has_escape_char(escape_chars)
     {
     }
 #endif
@@ -1538,10 +1504,6 @@ _ASYNCRTIMP void append_escape_string(std::basic_string<CharType>& str, const st
 
 void format_string(const utility::string_t& key, utility::string_t& str);
 
-#ifdef _WIN32
-void format_string(const utility::string_t& key, std::string& str);
-#endif
-
 class _Object : public _Value
 {
 public:
@@ -1573,21 +1535,10 @@ public:
         str.reserve(get_reserve_size());
         format(str);
     }
-#ifdef _WIN32
-    virtual void serialize_impl(std::wstring& str) const
-    {
-        // To avoid repeated allocations reserve some space all up front.
-        str.reserve(get_reserve_size());
-        format(str);
-    }
-#endif
     size_t size() const { return m_object.size(); }
 
 protected:
     virtual void format(std::basic_string<char>& str) const { format_impl(str); }
-#ifdef _WIN32
-    virtual void format(std::basic_string<wchar_t>& str) const { format_impl(str); }
-#endif
 
 private:
     json::object m_object;
@@ -1682,21 +1633,10 @@ public:
         str.reserve(get_reserve_size());
         format(str);
     }
-#ifdef _WIN32
-    virtual void serialize_impl(std::wstring& str) const
-    {
-        // To avoid repeated allocations reserve some space all up front.
-        str.reserve(get_reserve_size());
-        format(str);
-    }
-#endif
     size_t size() const { return m_array.size(); }
 
 protected:
     virtual void format(std::basic_string<char>& str) const { format_impl(str); }
-#ifdef _WIN32
-    virtual void format(std::basic_string<wchar_t>& str) const { format_impl(str); }
-#endif
 private:
     json::array m_array;
 

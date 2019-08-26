@@ -19,30 +19,21 @@
 #include <sstream>
 #include <string>
 
-#ifndef _WIN32
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
 #endif
 #include <stdint.h>
-#else
-#include <cstdint>
-#endif
 
 #include "cpprest/details/SafeInt3.hpp"
 
 namespace utility
 {
-#ifdef _WIN32
-#define _UTF16_STRINGS
-#endif
 
 // We should be using a 64-bit size type for most situations that do
 // not involve specifying the size of a memory allocation or buffer.
 typedef uint64_t size64_t;
 
-#ifndef _WIN32
 typedef uint32_t HRESULT; // Needed for PPLX
-#endif
 
 #ifdef _UTF16_STRINGS
 //

@@ -91,11 +91,7 @@ public:
         "This API is deprecated for security reasons to avoid unnecessary password copies stored in plaintext.")
     utility::string_t password() const
     {
-#if defined(_WIN32) && _WIN32_WINNT >= _WIN32_WINNT_VISTA
-        return utility::string_t(*m_password.decrypt());
-#else
         return m_password;
-#endif
     }
 
     /// <summary>
@@ -107,25 +103,13 @@ public:
     details::plaintext_string _internal_decrypt() const
     {
         // Encryption APIs not supported on XP
-#if defined(_WIN32) && _WIN32_WINNT >= _WIN32_WINNT_VISTA
-        return m_password.decrypt();
-#else
         return details::plaintext_string(new ::utility::string_t(m_password));
-#endif
     }
 
 private:
     ::utility::string_t m_username;
 
-#if defined(_WIN32) && _WIN32_WINNT >= _WIN32_WINNT_VISTA
-#if defined(__cplusplus_winrt)
-    details::winrt_encryption m_password;
-#else
-    details::win32_encryption m_password;
-#endif
-#else
     ::utility::string_t m_password;
-#endif
 };
 
 /// <summary>
